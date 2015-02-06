@@ -1,4 +1,5 @@
-// Ip menu extension
+// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+// Show Ip menu extension
 const Clutter = imports.gi.Clutter;
 const Lang = imports.lang;
 const St = imports.gi.St;
@@ -26,13 +27,14 @@ const IpMenu = new Lang.Class({
    Extends: PanelMenu.Button,
 
    _init: function() {
-      this.parent(0.0, _("Network devices"));
+      this.parent(0.0, _("Show IP"));
 
+      //create panel widget
       let nbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
       let icon = new St.Icon({ icon_name: 'network-wired-symbolic',
          style_class: 'system-status-icon' });
 
-      this.label = new St.Label({ text: 'xxx.xxx.xxx.xxx',
+      this.label = new St.Label({ text: '',
          y_expand: true,
          y_align: Clutter.ActorAlign.CENTER });
 
@@ -41,25 +43,49 @@ const IpMenu = new Lang.Class({
       nbox.add_child(this.label);
       this.actor.add_child(nbox);
 
+      //init global network devices and ip matching lists. put callbacks in place when network manager state change.
       this._startup();
-      for each (let deviface in listDevices) {
-         let item = new PopupMenu.PopupMenuItem(deviface);
-         item.connect('activate', Lang.bind(this,this._displayIps));
-         this.menu.addMenuItem(item);
-      }
+      //create menu to manually change/refresh the displayed ip.
+      this._createPopupMenu();
+      //display widget
       this._updateMenuVisibility();
    },
 
-   _displayIps: function(iface) {
-      this._displayIp(iface);
+
+
+   _createPopupMenu: function() {
+
+      for each (let deviface in listDevices) {
+       let item = new PopupMenu.PopupMenuItem(_(deviface));
+          this.menu.addMenuItem(item);
+        item.connect('activate', function(actor,event) {
+                    log(actor);
+                    log(event);
+                });
+      }
    },
 
-   _displayIp: function(iface) {
-      log(iface);
+   _call: function(item) {
+   this._fcall(item);
    },
 
-      //this.label.set_text(listIps[defaultDevice]);
+   _fcall: function(it) {
+   log(it);
+   },
 
+
+            //   this._monitor.connect('changed', Lang.bind(this, function () {
+           //     if (this._bookmarkTimeoutId > 0)
+           //         return;
+                /* Defensive event compression */
+           //     this._bookmarkTimeoutId = Mainloop.timeout_add(100, Lang.bind(this, function () {
+           //         this._bookmarkTimeoutId = 0;
+          //          this._reloadBookmarks();
+          //          return false;
+          //      }));
+         //   }));
+
+      //log(this.label.set_text("yhoo"));
 
    _decodeIp: function(device) {
       let ip;
@@ -91,24 +117,25 @@ const IpMenu = new Lang.Class({
    _startup: function() {
       this.client = NMC.Client.new();
       this.devices = this.client.get_devices();
+      //create the list of network device. TODO: test with no network devices
       for each (let device in this.devices) {
-         log('loop');
          log(device.get_state());
          listDevices.push(device.get_iface());
          listIps.push('not connected');
          device.connect('state-changed',Lang.bind(this, this._update ));
+         //update the ip for each device
          this._updateDeviceStatus(device);
-
-         log('finish loop device');
       }
       log(listDevices);
+      //find the acive connection if any
       this.activeConnections = this.client.get_active_connections();
       for each (let activeConnection in this.activeConnections) {
          defaultDevice = this._findDevice(activeConnection.get_devices()[0].get_iface());
          log(defaultDevice);
-         break; // the first one found become the default
+         break; // stop after the first one found, if several
       }
-
+      //update the widget label with the active connection. otherwise first network device.      
+      this.label.set_text(listIps[defaultDevice]);
    },
 
    _findDevice: function(deviceIface) {
@@ -124,7 +151,6 @@ const IpMenu = new Lang.Class({
       //Mainloop.timeout_add_seconds(1,function(){log("THIS IS");});
       listIps[this._findDevice(dev.get_iface())] = this._decodeIp(dev);
       log(listIps);
-      this.label.set_text(listIps[defaultDevice]);
    },
 
 
