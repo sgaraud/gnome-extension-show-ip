@@ -1,5 +1,6 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-// Show Ip menu extension
+// Show Ip menu gnome extension
+// 
 const Clutter = imports.gi.Clutter;
 const Lang = imports.lang;
 const St = imports.gi.St;
@@ -43,15 +44,14 @@ const IpMenu = new Lang.Class({
 
          //create panel widget
          let nbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
-         let icon = new St.Icon({ icon_name: 'network-wired-symbolic',
-            style_class: 'system-status-icon' });
+         //let icon = new St.Icon({ icon_name: 'network-wired-symbolic',
+         //   style_class: 'system-status-icon' });
 
          this.label = new St.Label({ text: '',
             y_expand: true,
             y_align: Clutter.ActorAlign.CENTER });
 
-
-         nbox.add_child(icon);
+         //nbox.add_child(icon);
          nbox.add_child(this.label);
          this.actor.add_child(nbox);
 
@@ -146,9 +146,9 @@ const IpMenu = new Lang.Class({
       },
 
       destroy: function() {
-         this.parent();
          myMap = new Map();
          listDevices = [];
+         this.parent();
       },
 });
 
