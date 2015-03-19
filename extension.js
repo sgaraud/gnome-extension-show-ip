@@ -40,6 +40,7 @@ const IpMenu = new Lang.Class({
       this.label.set_text(NOT_CONNECTED);
 
       this.client = NMC.Client.new();
+      log(NMC.version);
       this.client.connect('device-added', Lang.bind(this,this._getNetworkDevices));
       this.client.connect('device-removed', Lang.bind(this,this._getNetworkDevices));
 
@@ -63,17 +64,15 @@ const IpMenu = new Lang.Class({
    },
 
    _zetest: function(obj) {
+      log("notify addresses");
       log(Object.getOwnPropertyNames(obj));
    },
 
    _getNetworkDevices: function(nmc) {
       this.devices = nmc.get_devices();
       for each (let device in this.devices) {
-         log('update')
          this._uIp(device);
-         log('bind state')
          device.connect('notify::ip4-config',Lang.bind(this,this._uIp));
-         //device.connect('notify::dhcp4-config',Lang.bind(this,this._uIp));
       }
    },
 
@@ -82,7 +81,7 @@ const IpMenu = new Lang.Class({
    },
 
    _uIp: function(dev) {
-      log("aaaaaaaaaaa");
+      log("notify ip4-config");
       log(dev.get_iface());
       log(dev.get_state());
       let ip = 'unknown';
@@ -90,6 +89,7 @@ const IpMenu = new Lang.Class({
       log(ipcfg);
       if (ipcfg != null) {
          log('ipconfig is not null!');
+         ipcfg.connect('notify::addresses',Lang.bind(this,this._zetest));
          // array of Ips ?
          log(ipcfg.get_addresses());
          for each(let addr in ipcfg.get_addresses()){
@@ -122,10 +122,8 @@ const IpMenu = new Lang.Class({
          mapIps.delete(dev.get_iface());
       }
       
-      log('add to pop')
       this.menu.removeAll();
       for (let key of mapIps.keys()) {
-         log(key);
          this._addToPopupMenu(key);
       }
    },
@@ -146,7 +144,6 @@ let _indicator;
 
 function enable() {
    log('enable ipshow');
-   //log(this.client.get_manager_running());
    _indicator = new IpMenu;
    Main.panel.addToStatusArea('Ip-menu', _indicator);
 }
