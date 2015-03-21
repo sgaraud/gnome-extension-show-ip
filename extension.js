@@ -8,24 +8,30 @@
 const Clutter = imports.gi.Clutter;
 const Lang = imports.lang;
 const St = imports.gi.St;
-const Mainloop = imports.mainloop;
+const GObject = imports.gi.GObject;
 const Main = imports.ui.main;
 const Panel = imports.ui.panel;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
-
-const NetworkManager = imports.gi.NetworkManager;
 const NMC = imports.gi.NMClient;
 
 const NOT_CONNECTED = 'not connected'
-var mapIps = new Map();
-var deviceSelected = null;
+
+function init() {
+   
+}
 
 const IpMenu = new Lang.Class({
    Name: 'IpMenu.IpMenu',
    Extends: PanelMenu.Button,
 
    _init: function() {
+
+      //this._clientAddedId;
+      //this._clientRemovedId;
+      //this._manualUpdateId;
+      //this._stateChangedId;
+
       this.parent(0.0, _("Show IP"));
 
       let nbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
@@ -40,40 +46,28 @@ const IpMenu = new Lang.Class({
       this.label.set_text(NOT_CONNECTED);
 
       this.client = NMC.Client.new();
-      this.client.connect('device-added', Lang.bind(this,this._getNetworkDevices));
-      this.client.connect('device-removed', Lang.bind(this,this._getNetworkDevices));
+      this._clientAddedId = this.client.connect('device-added', Lang.bind(this,this._getNetworkDevices));
+      this._clientRemovedId = this.client.connect('device-removed', Lang.bind(this,this._getNetworkDevices));
       this._getNetworkDevices(this.client);
       this._updateMenuVisibility();
    },
 
    _addToPopupMenu: function(dev) {
-      let item = new PopupMenu.PopupMenuItem(dev);
-      this.menu.addMenuItem(item);
-      item.connect('activate', Lang.bind(this,this._manualUpdate));
+      this.item = new PopupMenu.PopupMenuItem(dev);
+      this.menu.addMenuItem(this.item);
+      this._manualUpdateId = this.item.connect('activate', Lang.bind(this,this._manualUpdate));
    },
 
    _createPopupMenu: function() {
       this.menu.removeAll();
-      for (let key of mapIps.keys()) {
+      for (let key of this.mapIps.keys()) {
          this._addToPopupMenu(key);
       }
    },
 
    _manualUpdate: function(it) {
-      deviceSelected = it.label.get_text();
-      this.label.set_text(mapIps.get(deviceSelected));
-   },
-
-   _getNetworkDevices: function(nmc) {
-      this.devices = nmc.get_devices();
-      for each (let device in this.devices) {
-
-         this._updateIp(device);
-         //log(NetworkManager.DeviceState.UNMANAGED);
-         //log(device.get_iface());
-         //log(device.get_state());
-         device.connect('state-changed',Lang.bind(this,this._updateIp));
-      }
+      this.deviceSelected = it.label.get_text();
+      this.label.set_text(this.mapIps.get(this.deviceSelected));
    },
 
    _updateMenuVisibility: function() {
@@ -91,99 +85,88 @@ const IpMenu = new Lang.Class({
       return array[0]+'.'+array[1]+'.'+array[2]+'.'+array[3];
    },
 
-   _decodeIp6: function(num) {
-      return num;
-   },
-
-
-   _getIp4s: function (ip4conf,iface) {
-      mapIps.set(iface,this._decodeIp4(ip4conf));
-      if (deviceSelected == null){
-         deviceSelected = iface;
-         this.label.set_text(mapIps.get(deviceSelected));
+   _getNetworkDevices: function(nmc) {
+      this.devices = nmc.get_devices();
+      this.mapIps = new Map();
+      this.deviceSelected = null;
+      this._devicesId=[];
+      this._ipconfId=[];
+      let i = 0;
+      for (let device of this.devices) {
+         this._updateIp(device);
+         this._devicesId[i++] = device.connect('state-changed',Lang.bind(this,this._updateIp));
       }
-      this._createPopupMenu();
    },
 
-   _getIp6s: function (ip6conf,iface) {
-      mapIps.set(iface,this._decodeIp6(ip6conf));
-      if (deviceSelected == null){
-         deviceSelected = iface;
-         this.label.set_text(mapIps.get(deviceSelected));
+   _getIp4s: function (ipconf,ifc) {
+      this.mapIps.set(ifc,this._decodeIp4(ipconf));
+      if (this.deviceSelected == null){
+         this.deviceSelected = ifc;
+         this.label.set_text(this.mapIps.get(this.deviceSelected));
       }
       this._createPopupMenu();
    },
 
    _updateIp: function(dev) {
-      let iface = dev.get_iface();
-      let ip4conf = dev.get_ip4_config();
-      let ip6conf = dev.get_ip6_config();
 
-      if (ip4conf != null) {
+      let ipconf = dev.get_ip4_config();
+      let ifc = dev.get_iface();
+
+      if (ipconf != null) {
          log("ip4");
-         log(ip4conf.get_addresses()[0]);
-
-         if (ip4conf.get_addresses()[0].get_address() == undefined ) {
-            ip4conf.connect('notify::addresses',Lang.bind(this,function(){
+         log(ipconf);
+         if (typeof(ipconf.get_addresses()[0]) == 'undefined') {
+            this._ipconfId.push(ipconf.connect('notify::addresses',Lang.bind(this,function(){
                log('callback ip4 addresses');
-               this._getIp4s(ip4conf.get_addresses()[0].get_address(),iface);
-            }));
+               this._getIp4s(ipconf.get_addresses()[0].get_address(),ifc);
+            })));
          }
          else {
-            this._getIp4s(ip4conf.get_addresses()[0].get_address(),iface);
+            this._getIp4s(ipconf.get_addresses()[0].get_address(),ifc);
          }
-      }
-      else if (ip6conf != null) {
-         log("ip6");
-         log(ip6conf.get_addresses()[0]);
-
-         if (ip6conf.get_addresses()[0].get_address() == undefined ) {
-            ip6conf.connect('notify::addresses',Lang.bind(this,function(){
-               log('callback ip6 addresses');
-               this._getIp6s(ip6conf.get_addresses()[0].get_address(),iface);
-            }));
-         }
-         else {
-            this._getIp6s(ip6conf.get_addresses()[0].get_address(),iface);
-         }
-
-
       }
       else{
          log('delete interface');
-         log(iface);
-         mapIps.delete(iface);
+         log(ifc);
+         this.mapIps.delete(ifc);
 
-         if(deviceSelected == iface){
-            if (mapIps.size == 0) {
-               deviceSelected = null;
+         if(this.deviceSelected == ifc){
+            if (this.mapIps.size == 0) {
+               this.deviceSelected = null;
                this.label.set_text(NOT_CONNECTED);
             }
             else{
-               for (let key of mapIps.keys()) {
-                  deviceSelected = key;
-                  this.label.set_text(mapIps.get(deviceSelected));
+               for (let key of this.mapIps.keys()) {
+                  this.deviceSelected = key;
+                  this.label.set_text(this.mapIps.get(this.deviceSelected));
                }
             }
          }
          this._createPopupMenu();
       }
+   log(this._ipconfId);
    },
 
+   _resetDevices: function() {
+      log("reset devices");
+      let i = 0;
+      this.mapIps.clear();
+      this.deviceSelected = null;
+      for (let device of this.devices) {
+      GObject.Object.prototype.disconnect.call(device,this._devicesId[i++]);
+      
+      }
+      this._devicesId=[];
+   },
 
    destroy: function() {
-      log("destroy");
-      mapIps.clear();
-      deviceSelected = null;
-      this.client.disconnect('device-added');
-      this.client.disconnect('device-removed');
+      this._resetDevices();
+      this.client.disconnect(this._clientAddedId);
+      this.client.disconnect(this._clientRemovedId);
+      this.item.disconnect(this._manualUpdateId);
       this.parent();
    },
 });
-
-function init() {
-   //nothing to do
-}
 
 let _indicator;
 
