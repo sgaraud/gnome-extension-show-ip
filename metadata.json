@@ -1,1 +1,1 @@
-{"shell-version": ["3.14"], "uuid": "show-ip@sgaraud.github.com", "version": 0.1, "url": "https://github.com/sgaraud/gnome-extension-show-ip", "name": "Show IP", "description": "Show IP address in gnome-shell bar"}
+{"shell-version": ["3.14"], "uuid": "show-ip@sgaraud.github.com", "version": 0, "url": "https://github.com/sgaraud/gnome-extension-show-ip", "name": "Show IP", "description": "Show IP address in gnome-shell bar"}
