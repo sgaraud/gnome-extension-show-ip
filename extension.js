@@ -76,21 +76,17 @@ const IpMenu = new Lang.Class({
    },
 
    _deviceAdded: function(client,device) {
-      log('device added');
       let _device;
       _device = new IpDevice(device);
       _device._stateChangedId = device.connect('state-changed',Lang.bind(this,this._updateIp));
       this._devices.push(_device);
       this._updateIp(device);
-      log(this._devices);
    },
 
    _deviceRemoved: function(client,device) {
-      log('device removed ' + device.get_iface());
       for (let dev of this._devices) {
          if (dev.device == device) {
-            log("found");
-             this._resetDevice(dev);
+            this._resetDevice(dev);
             if (this.selectedDevice == dev.ifc) {
                this.selectedDevice = null;
                this.label.set_text(NOT_CONNECTED);
@@ -103,7 +99,6 @@ const IpMenu = new Lang.Class({
             break;
          }
       }
-      log(this._devices);
    },
 
    _createPopupMenu: function() {
@@ -111,7 +106,6 @@ const IpMenu = new Lang.Class({
       for (let device of this._devices) {
          if (device.activated== true){
             this._addToPopupMenu(device.ifc);
-            log("hehe " + device.ifc);
          }
       }
    },
@@ -143,7 +137,6 @@ const IpMenu = new Lang.Class({
          this._devices[i++] = _device;
          this._updateIp(device);
       }
-      log(this._devices);
    },
 
    _updateIp: function(dev) {
@@ -152,25 +145,20 @@ const IpMenu = new Lang.Class({
       let ifc = dev.get_iface();
 
       if (ipconf != null && dev.get_state() == NetworkManager.DeviceState.ACTIVATED) {
-         log('add interface');
          this._addInterface(ipconf,ifc);
       }
       else{
-         log('delete interface');
          this._deleteInterface(ifc);
       }
    },
 
    _addInterface: function(ipconf, ifc) {
-      log(this._devices);
       for (let device of this._devices){
-         log(device._ipConfId);
          if (device.ifc == ifc){
-            log("BOOM");
 
             if (device._ipConfId != null) {
-                  device.ipconf.disconnect(device._ipConfId);
-                  device._ipConfId = null;
+               device.ipconf.disconnect(device._ipConfId);
+               device._ipConfId = null;
             }
 
             device.activated= true;
@@ -178,15 +166,14 @@ const IpMenu = new Lang.Class({
 
             if (typeof(device.ipconf.get_addresses()[0]) == 'undefined') {
                device._ipConfId = ipconf.connect('notify::addresses',Lang.bind(this,function(){
-                  log('callback ip4 addresses');
                   ipconf.disconnect(device._ipConfId);
                   device._ipConfId = null;
                   if (typeof(device.ipconf.get_addresses()[0]) != 'undefined') {
-                  this._getIp4s(ipconf.get_addresses()[0].get_address(),ifc);
+                     this._getIp4s(ipconf.get_addresses()[0].get_address(),ifc);
                   }
                   // tweak to catch possible buffered notification
                   else {
-                  this._getIp4s(0,ifc);
+                     this._getIp4s(0,ifc);
                   }
                }));
             }
@@ -202,7 +189,6 @@ const IpMenu = new Lang.Class({
 
       for (let device of this._devices) {
          if (device.ifc == ifc) {
-            log("BAM");
             device.activated= false;
 
             if (this.selectedDevice == device.ifc) {
@@ -254,19 +240,18 @@ const IpMenu = new Lang.Class({
    },
 
    _resetDevice: function(device) {
-      log("reset device");
-         GObject.Object.prototype.disconnect.call(device.device,device._stateChangedId);
-         if (device._ipConfId != null) {
-            GObject.Object.prototype.disconnect.call(device.ipconf,device._ipConfId);
-         }
+      GObject.Object.prototype.disconnect.call(device.device,device._stateChangedId);
+      if (device._ipConfId != null) {
+         GObject.Object.prototype.disconnect.call(device.ipconf,device._ipConfId);
+      }
    },
 
    destroy: function() {
       this.parent();
       if (this.nmStarted == true) {
-      for (let device of this._devices) {
-         this._resetDevice(device);
-      }
+         for (let device of this._devices) {
+            this._resetDevice(device);
+         }
          this._devices=[];
          this.client.disconnect(this._clientAddedId);
          this.client.disconnect(this._clientRemovedId);
