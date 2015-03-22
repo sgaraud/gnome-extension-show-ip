@@ -32,11 +32,9 @@ const IpDevice = new Lang.Class({
       this.ip = NOT_CONNECTED;
       this._stateChangedId = null;
       this._ipConfId = null;
-      this.selected = false;
-      this.displayed = false;
+      this.activated= false;
    },
 });
-
 
 const IpMenu = new Lang.Class({
    Name: 'IpMenu.IpMenu',
@@ -44,7 +42,9 @@ const IpMenu = new Lang.Class({
 
    _init: function() {
 
-      this._started = true;
+      this.nmStarted = true;
+      this.selectedDevice = null;
+
       this.parent(0.0, _("Show IP"));
 
       let nbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
@@ -61,14 +61,59 @@ const IpMenu = new Lang.Class({
 
       if (this.client.get_manager_running() == false) {
          this.label.set_text(NM_NOT_RUNNING);
-         this._started = false;
+         this.nmStarted = false;
          return;
       }
 
-      //this._clientAddedId = this.client.connect('device-added', Lang.bind(this,this._getNetworkDevices));
-      //this._clientRemovedId = this.client.connect('device-removed', Lang.bind(this,this._getNetworkDevices));
+      this._clientAddedId = this.client.connect('device-added', Lang.bind(this,this._deviceAdded));
+      this._clientRemovedId = this.client.connect('device-removed', Lang.bind(this,this._deviceRemoved));
       this._getNetworkDevices(this.client);
       this._updateMenuVisibility();
+   },
+
+   _updateMenuVisibility: function() {
+      this.actor.show();
+   },
+
+   _deviceAdded: function(client,device) {
+      log('device added');
+      let _device;
+      _device = new IpDevice(device);
+      _device._stateChangedId = device.connect('state-changed',Lang.bind(this,this._updateIp));
+      this._devices.push(_device);
+      this._updateIp(device);
+      log(this._devices);
+   },
+
+   _deviceRemoved: function(client,device) {
+      log('device removed ' + device.get_iface());
+      for (let dev of this._devices) {
+         if (dev.device == device) {
+            log("found");
+             this._resetDevice(dev);
+            if (this.selectedDevice == dev.ifc) {
+               this.selectedDevice = null;
+               this.label.set_text(NOT_CONNECTED);
+            }
+            let index = this._devices.indexOf(dev);
+            if (index > -1) {
+               this._devices.splice(index, 1);
+            }
+            this._createPopupMenu();
+            break;
+         }
+      }
+      log(this._devices);
+   },
+
+   _createPopupMenu: function() {
+      this.menu.removeAll();
+      for (let device of this._devices) {
+         if (device.activated== true){
+            this._addToPopupMenu(device.ifc);
+            log("hehe " + device.ifc);
+         }
+      }
    },
 
    _addToPopupMenu: function(dev) {
@@ -77,54 +122,14 @@ const IpMenu = new Lang.Class({
       this._manualUpdateId = this.item.connect('activate', Lang.bind(this,this._manualUpdate));
    },
 
-   _createPopupMenu: function() {
-
-      let i = 0;
-      this.menu.removeAll();
-
-      for (let device of this._devices) {
-         if (device.displayed == true){
-            this._addToPopupMenu(device.ifc);
-            log("hehe " + device.ifc);
-         }
-         if (device.selected == true) {
-         i++;
-         }
-      }
-      log("haha " + i);
-      if(i == 0 && this._devices.length !=0) {
-       for (let device of this._devices) {
-       }
-      }
-   },
-
    _manualUpdate: function(it) {
       for (let device of this._devices) {
          if (device.ifc == it.label.get_text()){
+            this.selectedDevice = device.ifc;
             this.label.set_text(device.ip);
-            device.selected = true;
-         }
-         else {
-         if (device.selected == true ) {
-            device.selected = false;
-         }
+            break;
          }
       }
-   },
-
-   _updateMenuVisibility: function() {
-      this.actor.show();
-   },
-
-   _decodeIp4: function(num) {
-      num = num>>>0;
-      let array = Uint8Array(4);
-      array[0] = num;
-      array[1] = num >> 8;
-      array[2] = num >> 16;
-      array[3] = num >> 24;
-
-      return array[0]+'.'+array[1]+'.'+array[2]+'.'+array[3];
    },
 
    _getNetworkDevices: function(nmc) {
@@ -139,54 +144,6 @@ const IpMenu = new Lang.Class({
          this._updateIp(device);
       }
       log(this._devices);
-   },
-
-   _getIp4s: function (ipadd,ifc) {
-
-      for (let device of this._devices) {
-         if(device.ifc == ifc) {
-            device.ip = this._decodeIp4(ipadd);
-         }
-      }
-      this._createPopupMenu();
-   },
-
-
-   _addInterface: function(ipconf, ifc) {
-      log(this._devices);
-      for (let device of this._devices){
-         if (device.ifc == ifc){
-            log("BOOM");
-            device.displayed = true;
-            device.ipconf = ipconf;
-
-            if (typeof(device.ipconf.get_addresses()[0]) == 'undefined') {
-               device._ipConfId = ipconf.connect('notify::addresses',Lang.bind(this,function(){
-                  log('callback ip4 addresses');
-                  this._getIp4s(ipconf.get_addresses()[0].get_address(),ifc);
-               }));
-            }
-            else {
-               this._getIp4s(ipconf.get_addresses()[0].get_address(),ifc);
-            }
-         }
-      }
-
-   },
-
-   _deleteInterface: function (ifc) {
-
-      for (let device of this._devices){
-         if (device.ifc == ifc){
-            log("BAM");
-            device.displayed = false;
-            if (device.selected == true){
-               device.selected = false;
-            }
-         }
-      }
-
-      this._createPopupMenu();
    },
 
    _updateIp: function(dev) {
@@ -204,23 +161,115 @@ const IpMenu = new Lang.Class({
       }
    },
 
-   _resetDevices: function() {
-      log("reset devices");
-      for (let device of this._devices) {
-         GObject.Object.prototype.disconnect.call(device.device,device._stateChangedId);
-         if (device._ipConfId != null) {
-            GObject.Object.prototype.disconnect.call(device.ipconf,device._ipConfId);
+   _addInterface: function(ipconf, ifc) {
+      log(this._devices);
+      for (let device of this._devices){
+         log(device._ipConfId);
+         if (device.ifc == ifc){
+            log("BOOM");
+
+            if (device._ipConfId != null) {
+                  device.ipconf.disconnect(device._ipConfId);
+                  device._ipConfId = null;
+            }
+
+            device.activated= true;
+            device.ipconf = ipconf;
+
+            if (typeof(device.ipconf.get_addresses()[0]) == 'undefined') {
+               device._ipConfId = ipconf.connect('notify::addresses',Lang.bind(this,function(){
+                  log('callback ip4 addresses');
+                  ipconf.disconnect(device._ipConfId);
+                  device._ipConfId = null;
+                  if (typeof(device.ipconf.get_addresses()[0]) != 'undefined') {
+                  this._getIp4s(ipconf.get_addresses()[0].get_address(),ifc);
+                  }
+                  // tweak to catch possible buffered notification
+                  else {
+                  this._getIp4s(0,ifc);
+                  }
+               }));
+            }
+            else {
+               this._getIp4s(ipconf.get_addresses()[0].get_address(),ifc);
+            }
+            break;
          }
       }
    },
 
+   _deleteInterface: function (ifc) {
+
+      for (let device of this._devices) {
+         if (device.ifc == ifc) {
+            log("BAM");
+            device.activated= false;
+
+            if (this.selectedDevice == device.ifc) {
+               this.selectedDevice = null;
+
+               for (let dev of this._devices) {
+                  if (dev.activated == true) {
+                     this.selectedDevice = dev.ifc;   
+                     this.label.set_text(dev.ip);
+                     break;
+                  }
+                  else{
+                     this.label.set_text(NOT_CONNECTED);
+                  }
+               }
+            }
+            break;
+         }
+      }
+
+      this._createPopupMenu();
+   },
+
+   _getIp4s: function (ipadd,ifc) {
+
+      for (let device of this._devices) {
+         if(device.ifc == ifc) {
+            device.ip = this._decodeIp4(ipadd);
+
+            if (this.selectedDevice == null) {
+               this.selectedDevice = device.ifc;
+               this.label.set_text(device.ip);
+            }
+            break;
+         }
+      }
+      this._createPopupMenu();
+   },
+
+   _decodeIp4: function(num) {
+      num = num>>>0;
+      let array = Uint8Array(4);
+      array[0] = num;
+      array[1] = num >> 8;
+      array[2] = num >> 16;
+      array[3] = num >> 24;
+
+      return array[0]+'.'+array[1]+'.'+array[2]+'.'+array[3];
+   },
+
+   _resetDevice: function(device) {
+      log("reset device");
+         GObject.Object.prototype.disconnect.call(device.device,device._stateChangedId);
+         if (device._ipConfId != null) {
+            GObject.Object.prototype.disconnect.call(device.ipconf,device._ipConfId);
+         }
+   },
+
    destroy: function() {
       this.parent();
-      if (this._started == true) {
-         this._resetDevices();
+      if (this.nmStarted == true) {
+      for (let device of this._devices) {
+         this._resetDevice(device);
+      }
          this._devices=[];
-         //this.client.disconnect(this._clientAddedId);
-         //this.client.disconnect(this._clientRemovedId);
+         this.client.disconnect(this._clientAddedId);
+         this.client.disconnect(this._clientRemovedId);
          this.item.disconnect(this._manualUpdateId);
       }
    },
