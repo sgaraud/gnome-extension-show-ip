@@ -1,5 +1,4 @@
-/* -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
- *
+/*
  * Show Ip menu gnome extension
  * https://github.com/sgaraud/
  *
