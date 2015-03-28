@@ -3,18 +3,18 @@
 This GNOME extension is simply showing current ip in gnome shell status bar if Network Manager is used.
 It has a popup menu to select manually the network device to display if several are activated on the machine.
 
-## Screenshot
+### Screenshot
 
 ![show ip extension on gnome shell](show_ip_screenshot.png?raw=true "Show IP gnome extension")
 
-## Installation
+### Installation
 
-### From gnome extensions website
+#### From gnome extensions website
 The extension is available from the extensions.gnome.org website. Visit the following link for instructions.
 
 https://extensions.gnome.org/extension/941/show-ip/
 
-### From source
+#### From source
 The extension can be installed directly from source, either for the convenience of using git or to test the latest version.
 
 Clone the desire branch with git
@@ -25,20 +25,20 @@ Clone the desire branch with git
 
 A Shell reload is required <code>Alt+F2 r Enter</code> and extension has to be enabled  with *gnome-tweak-tool* 
 
-## Bug Reporting
+### Bug Reporting
 
 Bugs should be reported to the Github [bug tracker issues](https://github.com/sgaraud/gnome-extension-show-ip/issues).
 
-## TODO in next version:
+### TODO for next version (version 2)
   * display the public IPs not only private IPs
   * remember the preferred network interface to display by default
 
-## Author
+### Author
 
   * Sylvain Garaud (garaud@gmail.com)
    
     https://github.com/sgaraud
 
-## License
+### License
 Show IP Gnome Shell extension is distributed under the terms of the GNU General Public License,
 version 2 or later.
