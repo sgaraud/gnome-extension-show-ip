@@ -23,16 +23,13 @@ Clone the desire branch with git
     ~/.local/share/gnome-shell/extensions/show-ip@sgaraud.github.com
 
 
-A Shell reload is required <code>Alt+F2 r Enter</code>
-Then extension has to be enabled  with *gnome-tweak-tool* 
+A Shell reload is required <code>Alt+F2 r Enter</code> and extension has to be enabled  with *gnome-tweak-tool* 
 
 ## Bug Reporting
 
 Bugs should be reported to the Github [bug tracker issues](https://github.com/sgaraud/gnome-extension-show-ip/issues).
 
-## TO DO
-
-Next version:
+## TODO in next version:
   * display the public IPs not only private IPs
   * remember the preferred network interface to display by default
 
