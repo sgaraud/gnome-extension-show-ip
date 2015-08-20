@@ -32,6 +32,7 @@ Bugs should be reported to the Github [bug tracker issues](https://github.com/sg
 ### TODO for next version (version 2)
   * display the public IPs not only private IPs
   * remember the preferred network interface to display by default
+  * support IPv6 display
 
 ### Author
 
