@@ -12,13 +12,17 @@ activated on the machine.
 
 ### Installation
 
-#### From gnome extensions website The extension is available from the
+#### From gnome extensions website
+
+The extension is available from the
 extensions.gnome.org website. Visit the following link for
 instructions.
 
 https://extensions.gnome.org/extension/941/show-ip/
 
-#### From source The extension can be installed directly from source,
+#### From source
+
+The extension can be installed directly from source,
 either for the convenience of using git or to test the latest version.
 
 Clone the desire branch with git
