@@ -44,7 +44,7 @@ const ShowIPSettingsWidget = new GObject.Class({
 
         let radio = null;
 
-	let check = new Gtk.CheckButton({ label: _("Display IPV6 version of the adress"),
+	let check = new Gtk.CheckButton({ label: _("Display IPV6 version of the address"),
 	                                  margin_top: 6 });
 	this._settings.bind(SETTINGS_IPV6, check, 'active', Gio.SettingsBindFlags.DEFAULT);
 	this.add(check);
