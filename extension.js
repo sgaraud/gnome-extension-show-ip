@@ -14,12 +14,31 @@ const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const NMC = imports.gi.NMClient;
 const NetworkManager = imports.gi.NetworkManager;
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
+const Convenience = Me.imports.convenience;
+
+// Used to request via HTTP the public address to a server.
+const Soup = imports.gi.Soup;
+const _httpSession = new Soup.SessionAsync();
+// This makes the session work under a proxy. The funky syntax here
+// is required because of another libsoup quirk, where there's a gobject
+// property called 'add-feature', designed as a construct property for
+// C convenience.
+Soup.Session.prototype.add_feature.call(_httpSession, new Soup.ProxyResolverDefault());
+
+// Setup to make the Preferences button in the PopupMenu open directly
+// the prefs GUI.
+const Shell = imports.gi.Shell;
+let _appSys = Shell.AppSystem.get_default();
+let _gsmPrefs = _appSys.lookup_app('gnome-shell-extension-prefs.desktop');
+let metadata = Me.metadata;
 
 const NOT_CONNECTED = 'not connected'
 const NM_NOT_RUNNING = 'NM not running'
 
 function init() {
-
+   Schema = Convenience.getSettings();
 }
 
 const IpDevice = new Lang.Class({
@@ -43,6 +62,8 @@ const IpMenu = new Lang.Class({
 
       this.nmStarted = true;
       this.selectedDevice = null;
+      if (Schema.get_string('last-device') != '')
+         this.selectedDevice = Schema.get_string('last-device');
 
       this.parent(0.0, _("Show IP"));
 
@@ -107,6 +128,18 @@ const IpMenu = new Lang.Class({
             this._addToPopupMenu(device.ifc);
          }
       }
+      this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+      this.item = new PopupMenu.PopupMenuItem(_("Preferences"));
+      this.menu.addMenuItem(this.item);
+      this.item.connect('activate', function () {
+         if (_gsmPrefs.get_state() == _gsmPrefs.SHELL_APP_STATE_RUNNING){
+            _gsmPrefs.activate();
+         } else {
+            let info = _gsmPrefs.get_app_info();
+            let timestamp = global.display.get_current_time_roundtrip();
+            info.launch_uris([metadata.uuid], global.create_app_launch_context(timestamp, -1));
+         }
+      });
    },
 
    _addToPopupMenu: function(dev) {
@@ -119,10 +152,12 @@ const IpMenu = new Lang.Class({
       for (let device of this._devices) {
          if (device.ifc == it.label.get_text()){
             this.selectedDevice = device.ifc;
+            Schema.set_string('last-device',device.ifc);
             this.label.set_text(device.ip);
             break;
          }
       }
+      this._setPublic();
    },
 
    _getNetworkDevices: function(nmc) {
@@ -139,8 +174,9 @@ const IpMenu = new Lang.Class({
    },
 
    _updateIp: function(dev) {
-
       let ipconf = dev.get_ip4_config();
+      if (Schema.get_boolean('ipv6'))
+         ipconf = dev.get_ip6_config();
       let ifc = dev.get_iface();
 
       if (ipconf != null && dev.get_state() == NetworkManager.DeviceState.ACTIVATED) {
@@ -168,16 +204,16 @@ const IpMenu = new Lang.Class({
                   ipconf.disconnect(device._ipConfId);
                   device._ipConfId = null;
                   if (typeof(device.ipconf.get_addresses()[0]) != 'undefined') {
-                     this._getIp4s(ipconf.get_addresses()[0].get_address(),ifc);
+                     this._getIps(ipconf.get_addresses()[0].get_address(),ifc);
                   }
                   // tweak to catch possible buffered notification
                   else {
-                     this._getIp4s(0,ifc);
+                     this._getIps(0,ifc);
                   }
                }));
             }
             else {
-               this._getIp4s(ipconf.get_addresses()[0].get_address(),ifc);
+               this._getIps(ipconf.get_addresses()[0].get_address(),ifc);
             }
             break;
          }
@@ -211,19 +247,36 @@ const IpMenu = new Lang.Class({
       this._createPopupMenu();
    },
 
-   _getIp4s: function (ipadd,ifc) {
+   _getIps: function (ipadd,ifc) {
 
+      // get a boolean if remembered device still exists or not
+      let found = false;
+      for (let device of this._devices) {
+         if (this.selectedDevice == device.ifc)
+            found = true;
+      }
+
+      // iterate until current device found in list
       for (let device of this._devices) {
          if(device.ifc == ifc) {
-            device.ip = this._decodeIp4(ipadd);
+            // populate the device 'ip' field
+            if (Schema.get_boolean('ipv6')){
+               device.ip = this._decodeIp6(ipadd);
+            } else {
+               device.ip = this._decodeIp4(ipadd);
+            }
 
-            if (this.selectedDevice == null) {
+            // SPECIAL CASE for device rememberance ability
+            if (!found) {
                this.selectedDevice = device.ifc;
+               this.label.set_text(device.ip);
+            } else if (this.selectedDevice == ifc) {
                this.label.set_text(device.ip);
             }
             break;
          }
       }
+      this._setPublic();
       this._createPopupMenu();
    },
 
@@ -236,6 +289,43 @@ const IpMenu = new Lang.Class({
       array[3] = num >> 24;
 
       return array[0]+'.'+array[1]+'.'+array[2]+'.'+array[3];
+   },
+
+      // inspired from http://phpjs.org/functions/inet_ntop/
+   _decodeIp6: function(num) {
+      var c = [];
+      var m = '';
+      for (i = 0; i < 16; i=i+2) {
+         c.push(num[i].toString(16) + num[i+1].toString(16));
+      }
+      return c.join(':')
+         .replace(/((^|:)0*(?=:|$))+:?/g, function(t) {
+            m = (t.length > m.length) ? t : m;
+            return t;
+         })
+      .replace(m || ' ', '::');
+   },
+
+   _getPublic: function(callback) {
+      let request = Soup.Message.new('GET','http://ipinfo.io/ip');
+
+      _httpSession.queue_message(request, function(_httpSession, message) {
+         if (message.status_code !== 200) {
+            callback(message.status_code, null);
+            return;
+         }
+         let ip = request.response_body.data;
+         callback(null, ip);
+      });
+   },
+
+   _setPublic: function() {
+      if (Schema.get_boolean('public')){
+         let that = this.label;  
+         this._getPublic(function(err,res){
+            that.set_text(res.trim());
+         });
+      }
    },
 
    _resetDevice: function(device) {

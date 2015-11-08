@@ -1,0 +1,19 @@
+<schemalist gettext-domain="show-ip">
+  <schema id="org.gnome.shell.extensions.show-ip" path="/org/gnome/shell/extensions/show-ip/">
+    <key name="ipv6" type="b">
+      <default>false</default>
+      <summary>Display ipv6 version of the address</summary>
+      <description>Set to true to display ipv6 version of the address in the status bar.</description>
+    </key>
+    <key name="public" type="b">
+      <default>false</default>
+      <summary>Display public IP address</summary>
+      <description>Set to true to display the public version of your address in the status bar</description>
+    </key>
+    <key name="last-device" type="s">
+      <default>''</default>
+      <summary>Last manually selected device</summary>
+      <description>Set automagically when a device is selected in the PopupMenu</description>
+    </key>
+  </schema>
+</schemalist>
