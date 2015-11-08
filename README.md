@@ -5,10 +5,16 @@ gnome shell status bar if Network Manager is used.  It has a popup
 menu to select manually the network device to display if several are
 activated on the machine.
 
-### Screenshot
+### Screenshots
 
-![show ip extension on gnome shell](show_ip_screenshot.png?raw=true
- "Show IP gnome extension")
+![show ip extension on gnome shell, ipv4](show_ipv4_screenshot.png?raw=true
+ "Show IPv4 gnome extension")
+
+![show ip extension on gnome shell, ipv6 compatible](show_ipv6_screenshot.png?raw=true
+ "Show IPv6 gnome extension")
+
+![show ip extension preference menu](show_ip_pref_menu_screenshot.png?raw=true
+ "Show IP pref menu gnome extension")
 
 ### Installation
 
@@ -44,7 +50,12 @@ issues](https://github.com/sgaraud/gnome-extension-show-ip/issues).
   * copy to clipboard the address
   * add a preference menu to configure public ip mechanism,
     preferred network and maybe ipv6
-  
+
+### Authors
+
+  * sgaraud (Sylvain Garaud)
+  * rigelk (Pierre-Antoine Rault)
+
 ### License
 
 Copyright (C) 2015 Sylvain Garaud
