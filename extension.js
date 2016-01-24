@@ -1,7 +1,19 @@
 /*
  * Show Ip menu gnome extension
- * https://github.com/sgaraud/
- *
+ * https://github.com/sgaraud/gnome-extension-show-ip
+ * 
+ * Copyright (C) 2015 Sylvain Garaud
+ * This program is free software: you can redistribute it and/or modify it under 
+ * the terms of the GNU General Public License as published by the Free Software 
+ * Foundation, either version 2 of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+ * PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this 
+ * program. If not, see http://www.gnu.org/licenses/.
+ * 
  */
 
 const Clutter = imports.gi.Clutter;
@@ -36,10 +48,12 @@ let metadata = Me.metadata;
 
 const NOT_CONNECTED = 'not connected'
 const NM_NOT_RUNNING = 'NM not running'
+const PUBLIC_IP = 'Public IP'
 
 function init() {
    Schema = Convenience.getSettings();
 }
+
 
 const IpDevice = new Lang.Class({
    Name: 'IpDevice.IpDevice',
@@ -61,12 +75,15 @@ const IpMenu = new Lang.Class({
    _init: function() {
 
       this.nmStarted = true;
-      this.selectedDevice = null;
-      if (Schema.get_string('last-device') != '')
+
+      if (Schema.get_string('last-device') != '') {
          this.selectedDevice = Schema.get_string('last-device');
+      }
+      else{
+         this.selectedDevice = null;
+      }
 
       this.parent(0.0, _("Show IP"));
-
       let nbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
 
       this.label = new St.Label({ text: '',
@@ -124,14 +141,19 @@ const IpMenu = new Lang.Class({
    _createPopupMenu: function() {
       this.menu.removeAll();
       for (let device of this._devices) {
-         if (device.activated== true){
+         //if (device.activated == true){
             this._addToPopupMenu(device.ifc);
-         }
+         //}
       }
+      
+      if (Schema.get_boolean('public')){
+    	  this._addToPopupMenu(PUBLIC_IP);
+       }
+      
       this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-      this.item = new PopupMenu.PopupMenuItem(_("Preferences"));
-      this.menu.addMenuItem(this.item);
-      this.item.connect('activate', function () {
+      this.itemPref = new PopupMenu.PopupMenuItem(_("Preferences"));
+      this.menu.addMenuItem(this.itemPref);
+      this.itemPref.connect('activate', function () {
          if (_gsmPrefs.get_state() == _gsmPrefs.SHELL_APP_STATE_RUNNING){
             _gsmPrefs.activate();
          } else {
@@ -148,7 +170,13 @@ const IpMenu = new Lang.Class({
       this._manualUpdateId = this.item.connect('activate', Lang.bind(this,this._manualUpdate));
    },
 
+   /*
+    * Set IP address into shell text label
+    */
    _manualUpdate: function(it) {
+	  if (it.label.get_text() == PUBLIC_IP){
+		 this._setPublic();
+	  }
       for (let device of this._devices) {
          if (device.ifc == it.label.get_text()){
             this.selectedDevice = device.ifc;
@@ -157,9 +185,12 @@ const IpMenu = new Lang.Class({
             break;
          }
       }
-      this._setPublic();
    },
 
+   /* 
+    * Create the list of network devices and callback an update of IP
+    * when device status is changed. 
+    */
    _getNetworkDevices: function(nmc) {
       let _device;
       this.devices = nmc.get_devices();
@@ -173,6 +204,9 @@ const IpMenu = new Lang.Class({
       }
    },
 
+   /*
+    * haha
+    */
    _updateIp: function(dev) {
       let ipconf = dev.get_ip4_config();
       if (Schema.get_boolean('ipv6'))
@@ -196,7 +230,7 @@ const IpMenu = new Lang.Class({
                device._ipConfId = null;
             }
 
-            device.activated= true;
+            device.activated = true;
             device.ipconf = ipconf;
 
             if (typeof(device.ipconf.get_addresses()[0]) == 'undefined') {
@@ -224,7 +258,7 @@ const IpMenu = new Lang.Class({
 
       for (let device of this._devices) {
          if (device.ifc == ifc) {
-            device.activated= false;
+            device.activated = false;
 
             if (this.selectedDevice == device.ifc) {
                this.selectedDevice = null;
@@ -249,13 +283,7 @@ const IpMenu = new Lang.Class({
 
    _getIps: function (ipadd,ifc) {
 
-      // get a boolean if remembered device still exists or not
-      let found = false;
-      for (let device of this._devices) {
-         if (this.selectedDevice == device.ifc)
-            found = true;
-      }
-
+      log("getIps func");
       // iterate until current device found in list
       for (let device of this._devices) {
          if(device.ifc == ifc) {
@@ -265,18 +293,9 @@ const IpMenu = new Lang.Class({
             } else {
                device.ip = this._decodeIp4(ipadd);
             }
-
-            // SPECIAL CASE for device rememberance ability
-            if (!found) {
-               this.selectedDevice = device.ifc;
-               this.label.set_text(device.ip);
-            } else if (this.selectedDevice == ifc) {
-               this.label.set_text(device.ip);
-            }
             break;
          }
       }
-      this._setPublic();
       this._createPopupMenu();
    },
 
@@ -307,7 +326,7 @@ const IpMenu = new Lang.Class({
    },
 
    _getPublic: function(callback) {
-      let request = Soup.Message.new('GET','http://ipinfo.io/ip');
+      let request = Soup.Message.new('GET',Schema.get_string('ip-lookup-service'));
 
       _httpSession.queue_message(request, function(_httpSession, message) {
          if (message.status_code !== 200) {

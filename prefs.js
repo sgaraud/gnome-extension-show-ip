@@ -16,6 +16,7 @@ const Convenience = Me.imports.convenience;
 const SETTINGS_APP_ICON_MODE = 'app-icon-mode';
 const SETTINGS_IPV6 = 'ipv6';
 const SETTINGS_PUBLIC = 'public';
+const SETTINGS_LOOKUP_SERVICE = 'ip-lookup-service';
 
 const ShowIPSettingsWidget = new GObject.Class({
     Name: 'ShowIP.Prefs.ShowIPSettingsWidget',
@@ -30,19 +31,17 @@ const ShowIPSettingsWidget = new GObject.Class({
 
 	this._settings = Convenience.getSettings();
 
-        let presentLabel = '<b>' + _("Display options") + '</b>';
-        this.add(new Gtk.Label({ label: presentLabel, use_markup: true,
+    let presentLabel = '<b>' + _("Display options") + '</b>';
+    this.add(new Gtk.Label({ label: presentLabel, use_markup: true,
                                  halign: Gtk.Align.START }));
 
-        let align = new Gtk.Alignment({ left_padding: 12 });
-        this.add(align);
+    let align = new Gtk.Alignment({ left_padding: 12 });
+    this.add(align);
 
-        let grid = new Gtk.Grid({ orientation: Gtk.Orientation.VERTICAL,
+    let grid = new Gtk.Grid({ orientation: Gtk.Orientation.VERTICAL,
                                   row_spacing: 6,
                                   column_spacing: 6 });
-        align.add(grid);
-
-        let radio = null;
+    align.add(grid);
 
 	let check = new Gtk.CheckButton({ label: _("Display IPV6 version of the address"),
 	                                  margin_top: 6 });
@@ -53,6 +52,12 @@ const ShowIPSettingsWidget = new GObject.Class({
 	                                  margin_top: 6 });
 	this._settings.bind(SETTINGS_PUBLIC, check2, 'active', Gio.SettingsBindFlags.DEFAULT);
 	this.add(check2);
+	
+	this.add(new Gtk.Label({ label: _("Public IP lookup service provider"), halign: Gtk.Align.START }));
+	let txt = new Gtk.Entry();
+	this._settings.bind(SETTINGS_LOOKUP_SERVICE, txt, 'text', Gio.SettingsBindFlags.DEFAULT);
+	this.add(txt);
+	
     },
 });
 
