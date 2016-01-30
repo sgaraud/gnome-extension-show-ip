@@ -54,7 +54,6 @@ function init() {
    Schema = Convenience.getSettings();
 }
 
-
 const IpDevice = new Lang.Class({
    Name: 'IpDevice.IpDevice',
    _init: function (obj) {
@@ -64,7 +63,6 @@ const IpDevice = new Lang.Class({
       this.ip = NOT_CONNECTED;
       this._stateChangedId = null;
       this._ipConfId = null;
-      this.activated= false;
    },
 });
 
@@ -75,13 +73,7 @@ const IpMenu = new Lang.Class({
    _init: function() {
 
       this.nmStarted = true;
-
-      if (Schema.get_string('last-device') != '') {
-         this.selectedDevice = Schema.get_string('last-device');
-      }
-      else{
-         this.selectedDevice = null;
-      }
+       this.selectedDevice = Schema.get_string('last-device');
 
       this.parent(0.0, _("Show IP"));
       let nbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
@@ -125,14 +117,12 @@ const IpMenu = new Lang.Class({
          if (dev.device == device) {
             this._resetDevice(dev);
             if (this.selectedDevice == dev.ifc) {
-               this.selectedDevice = null;
-               this.label.set_text(NOT_CONNECTED);
+               this.selectedDevice = '';
             }
             let index = this._devices.indexOf(dev);
             if (index > -1) {
                this._devices.splice(index, 1);
             }
-            this._createPopupMenu();
             break;
          }
       }
@@ -140,16 +130,19 @@ const IpMenu = new Lang.Class({
 
    _createPopupMenu: function() {
       this.menu.removeAll();
+
       for (let device of this._devices) {
-         //if (device.activated == true){
             this._addToPopupMenu(device.ifc);
-         //}
       }
-      
-      if (Schema.get_boolean('public')){
-    	  this._addToPopupMenu(PUBLIC_IP);
+
+       if (Schema.get_boolean('public')){
+           this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+           this._addToPopupMenu(PUBLIC_IP);
+           if( PUBLIC_IP == this.selectedDevice){
+               this._setPublic();
+           }
        }
-      
+
       this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
       this.itemPref = new PopupMenu.PopupMenuItem(_("Preferences"));
       this.menu.addMenuItem(this.itemPref);
@@ -162,6 +155,16 @@ const IpMenu = new Lang.Class({
             info.launch_uris([metadata.uuid], global.create_app_launch_context(timestamp, -1));
          }
       });
+
+       for (let device of this._devices) {
+           if (device.ifc == this.selectedDevice){
+               this.label.set_text(device.ip);
+               break;
+           }
+       }
+       if ('' == this.selectedDevice){
+           this.label.set_text(NOT_CONNECTED);
+       }
    },
 
    _addToPopupMenu: function(dev) {
@@ -170,21 +173,20 @@ const IpMenu = new Lang.Class({
       this._manualUpdateId = this.item.connect('activate', Lang.bind(this,this._manualUpdate));
    },
 
-   /*
-    * Set IP address into shell text label
-    */
    _manualUpdate: function(it) {
-	  if (it.label.get_text() == PUBLIC_IP){
-		 this._setPublic();
-	  }
       for (let device of this._devices) {
          if (device.ifc == it.label.get_text()){
             this.selectedDevice = device.ifc;
             Schema.set_string('last-device',device.ifc);
-            this.label.set_text(device.ip);
             break;
          }
       }
+       if (PUBLIC_IP == it.label.get_text()){
+           this.selectedDevice = PUBLIC_IP;
+           Schema.set_string('last-device',PUBLIC_IP);
+       }
+
+       this._createPopupMenu();
    },
 
    /* 
@@ -204,16 +206,14 @@ const IpMenu = new Lang.Class({
       }
    },
 
-   /*
-    * haha
-    */
    _updateIp: function(dev) {
       let ipconf = dev.get_ip4_config();
-      if (Schema.get_boolean('ipv6'))
+      if (Schema.get_boolean('ipv6')){
          ipconf = dev.get_ip6_config();
+      }
       let ifc = dev.get_iface();
 
-      if (ipconf != null && dev.get_state() == NetworkManager.DeviceState.ACTIVATED) {
+      if (ipconf != null /*&& dev.get_state() == NetworkManager.DeviceState.ACTIVATED*/) {
          this._addInterface(ipconf,ifc);
       }
       else{
@@ -229,8 +229,6 @@ const IpMenu = new Lang.Class({
                device.ipconf.disconnect(device._ipConfId);
                device._ipConfId = null;
             }
-
-            device.activated = true;
             device.ipconf = ipconf;
 
             if (typeof(device.ipconf.get_addresses()[0]) == 'undefined') {
@@ -258,32 +256,17 @@ const IpMenu = new Lang.Class({
 
       for (let device of this._devices) {
          if (device.ifc == ifc) {
-            device.activated = false;
-
             if (this.selectedDevice == device.ifc) {
-               this.selectedDevice = null;
-
-               for (let dev of this._devices) {
-                  if (dev.activated == true) {
-                     this.selectedDevice = dev.ifc;   
-                     this.label.set_text(dev.ip);
-                     break;
-                  }
-                  else{
-                     this.label.set_text(NOT_CONNECTED);
-                  }
-               }
+               this.selectedDevice = '';
             }
+             device.ip = NOT_CONNECTED;
             break;
          }
       }
-
       this._createPopupMenu();
    },
 
    _getIps: function (ipadd,ifc) {
-
-      log("getIps func");
       // iterate until current device found in list
       for (let device of this._devices) {
          if(device.ifc == ifc) {
@@ -293,6 +276,11 @@ const IpMenu = new Lang.Class({
             } else {
                device.ip = this._decodeIp4(ipadd);
             }
+
+             if ('' == this.selectedDevice){
+                 this.selectedDevice = device.ifc;
+             }
+
             break;
          }
       }
@@ -339,12 +327,18 @@ const IpMenu = new Lang.Class({
    },
 
    _setPublic: function() {
-      if (Schema.get_boolean('public')){
-         let that = this.label;  
+         let that = this.label;
+         let sd = this.selectedDevice;
          this._getPublic(function(err,res){
-            that.set_text(res.trim());
+             if (PUBLIC_IP == sd) {
+                 if (res != null) {
+                     that.set_text(res.trim());
+                 }
+                 else {
+                     that.set_text(NOT_CONNECTED);
+                 }
+             }
          });
-      }
    },
 
    _resetDevice: function(device) {
