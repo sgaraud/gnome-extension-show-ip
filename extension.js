@@ -311,9 +311,9 @@ const IpMenu = new Lang.Class({
 
     /* inspired from http://phpjs.org/functions/inet_ntop/ */
     _decodeIp6: function (num) {
-        var c = [];
-        var m = '';
-        var i = 0;
+        let c = [];
+        let m = '';
+        let i = 0;
         for (i = 0; i < 16; i = i + 2) {
             c.push(num[i].toString(16) + num[i + 1].toString(16));
         }
