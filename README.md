@@ -44,7 +44,6 @@ Clone the desire branch with git
     git clone https://github.com/sgaraud/gnome-extension-show-ip.git \
     ~/.local/share/gnome-shell/extensions/show-ip@sgaraud.github.com
 
-
 A Shell reload is required <code>Alt+F2 r Enter</code> and extension
 has to be enabled with *gnome-tweak-tool*
 
