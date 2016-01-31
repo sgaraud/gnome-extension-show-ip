@@ -53,7 +53,7 @@ const ShowIPSettingsWidget = new GObject.Class({
         this.add(check);
 
         let check2 = new Gtk.CheckButton({
-            label: _("Display public address instead of the local one"),
+            label: _("Display public address"),
             margin_top: 6
         });
         this._settings.bind(SETTINGS_PUBLIC, check2, 'active', Gio.SettingsBindFlags.DEFAULT);

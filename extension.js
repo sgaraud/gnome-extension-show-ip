@@ -21,7 +21,6 @@ const Lang = imports.lang;
 const St = imports.gi.St;
 const GObject = imports.gi.GObject;
 const Main = imports.ui.main;
-const Panel = imports.ui.panel;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const NMC = imports.gi.NMClient;
@@ -30,17 +29,19 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
 
-// Used to request via HTTP the public address to a server.
+/* Used to request via HTTP the public address to a server. */
 const Soup = imports.gi.Soup;
 const _httpSession = new Soup.SessionAsync();
-// This makes the session work under a proxy. The funky syntax here
-// is required because of another libsoup quirk, where there's a gobject
-// property called 'add-feature', designed as a construct property for
-// C convenience.
+/* This makes the session work under a proxy. The funky syntax here
+ * is required because of another libsoup quirk, where there's a gobject
+ * property called 'add-feature', designed as a construct property for
+ * C convenience.
+ */
 Soup.Session.prototype.add_feature.call(_httpSession, new Soup.ProxyResolverDefault());
 
-// Setup to make the Preferences button in the PopupMenu open directly
-// the prefs GUI.
+/* Setup to make the Preferences button in the PopupMenu open directly
+ * the prefs GUI.
+ */
 const Shell = imports.gi.Shell;
 let _appSys = Shell.AppSystem.get_default();
 let _gsmPrefs = _appSys.lookup_app('gnome-shell-extension-prefs.desktop');
@@ -141,17 +142,28 @@ const IpMenu = new Lang.Class({
         }
 
         if (Schema.get_boolean('public')) {
-            this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
             this._addToPopupMenu(PUBLIC_IP);
             if (PUBLIC_IP == this.selectedDevice) {
-                this._setPublic();
+                if (this.client.get_state() == NetworkManager.State.CONNECTED_GLOBAL) {
+                    this._setPublic();
+                }
+                else {
+                    this.label.set_text(NOT_CONNECTED);
+                }
             }
         }
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this.itemClip = new PopupMenu.PopupMenuItem(_("Copy to clipboard"));
+        this.menu.addMenuItem(this.itemClip);
+        let lastIp = this.label;
+        this._itemClipId = this.itemClip.connect('activate', function () {
+            St.Clipboard.get_default().set_text(St.ClipboardType.PRIMARY, lastIp.get_text());
+            St.Clipboard.get_default().set_text(St.ClipboardType.CLIPBOARD, lastIp.get_text());
+        });
         this.itemPref = new PopupMenu.PopupMenuItem(_("Preferences"));
         this.menu.addMenuItem(this.itemPref);
-        this.itemPref.connect('activate', function () {
+        this._itemPrefId = this.itemPref.connect('activate', function () {
             if (_gsmPrefs.get_state() == _gsmPrefs.SHELL_APP_STATE_RUNNING) {
                 _gsmPrefs.activate();
             } else {
@@ -214,7 +226,7 @@ const IpMenu = new Lang.Class({
         }
         let ifc = dev.get_iface();
 
-        if (ipconf != null /*&& dev.get_state() == NetworkManager.DeviceState.ACTIVATED*/) {
+        if (ipconf != null) {
             this._addInterface(ipconf, ifc);
         }
         else {
@@ -268,10 +280,10 @@ const IpMenu = new Lang.Class({
     },
 
     _getIps: function (ipadd, ifc) {
-        // iterate until current device found in list
+        /* iterate until current device found in list */
         for (let device of this._devices) {
             if (device.ifc == ifc) {
-                // populate the device 'ip' field
+                /* populate the device 'ip' field */
                 if (Schema.get_boolean('ipv6')) {
                     device.ip = this._decodeIp6(ipadd);
                 } else {
@@ -297,7 +309,7 @@ const IpMenu = new Lang.Class({
         return array[0] + '.' + array[1] + '.' + array[2] + '.' + array[3];
     },
 
-    // inspired from http://phpjs.org/functions/inet_ntop/
+    /* inspired from http://phpjs.org/functions/inet_ntop/ */
     _decodeIp6: function (num) {
         var c = [];
         var m = '';
@@ -328,15 +340,12 @@ const IpMenu = new Lang.Class({
 
     _setPublic: function () {
         let that = this.label;
-        let sd = this.selectedDevice;
         this._getPublic(function (err, res) {
-            if (PUBLIC_IP == sd) {
-                if (res != null) {
-                    that.set_text(res.trim());
-                }
-                else {
-                    that.set_text(NOT_CONNECTED);
-                }
+            if (res != null) {
+                that.set_text(res.trim());
+            }
+            else {
+                that.set_text(NOT_CONNECTED);
             }
         });
     },
@@ -355,6 +364,12 @@ const IpMenu = new Lang.Class({
                 this._resetDevice(device);
             }
             this._devices = [];
+            if (this._itemClipId) {
+                this.itemClip.disconnect(this._itemClipId);
+            }
+            if (this._itemPrefId) {
+                this.itemPref.disconnect(this._itemPrefId);
+            }
             this.client.disconnect(this._clientAddedId);
             this.client.disconnect(this._clientRemovedId);
             this.item.disconnect(this._manualUpdateId);
