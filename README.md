@@ -47,7 +47,7 @@ has to be enabled with *gnome-tweak-tool*
 
 ### Bug Reporting
 
-Bugs should be reported to the Github [bug tracker
+:sweat_smile: Bugs should be reported to the Github [bug tracker
 issues](https://github.com/sgaraud/gnome-extension-show-ip/issues).
 
 ### Authors
