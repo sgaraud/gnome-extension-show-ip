@@ -45,10 +45,13 @@ const Shell = imports.gi.Shell;
 let _appSys = Shell.AppSystem.get_default();
 let _gsmPrefs = _appSys.lookup_app('gnome-shell-extension-prefs.desktop');
 let metadata = Me.metadata;
+let Schema = null;
+let settingsChangedPublic = null;
+let settingsChangedIpv6 = null;
 
-const NOT_CONNECTED = 'not connected'
-const NM_NOT_RUNNING = 'NM not running'
-const PUBLIC_IP = 'Public IP'
+const NOT_CONNECTED = 'not connected';
+const NM_NOT_RUNNING = 'NM not running';
+const PUBLIC_IP = 'Public IP';
 
 function init() {
     Schema = Convenience.getSettings();
@@ -274,11 +277,9 @@ const IpMenu = new Lang.Class({
                 } else {
                     device.ip = this._decodeIp4(ipadd);
                 }
-
                 if ('' == this.selectedDevice) {
                     this.selectedDevice = device.ifc;
                 }
-
                 break;
             }
         }
@@ -300,6 +301,7 @@ const IpMenu = new Lang.Class({
     _decodeIp6: function (num) {
         var c = [];
         var m = '';
+        var i = 0;
         for (i = 0; i < 16; i = i + 2) {
             c.push(num[i].toString(16) + num[i + 1].toString(16));
         }
@@ -365,8 +367,29 @@ let _indicator;
 function enable() {
     _indicator = new IpMenu;
     Main.panel.addToStatusArea('Ip-menu', _indicator);
+
+    /* Monitor settings changes */
+    settingsChangedPublic = Schema.connect('changed::public', function () {
+        _indicator.destroy();
+        _indicator = new IpMenu;
+        Main.panel.addToStatusArea('Ip-menu', _indicator);
+    });
+    settingsChangedIpv6 = Schema.connect('changed::ipv6', function () {
+        _indicator.destroy();
+        _indicator = new IpMenu;
+        Main.panel.addToStatusArea('Ip-menu', _indicator);
+    });
+
 }
 
 function disable() {
     _indicator.destroy();
+
+    /* disconnect settings changes */
+    if (settingsChangedPublic) {
+        Schema.disconnect(settingsChangedPublic);
+    }
+    if (settingsChangedIpv6) {
+        Schema.disconnect(settingsChangedIpv6);
+    }
 }
