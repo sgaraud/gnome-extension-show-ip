@@ -9,14 +9,17 @@ display public IP. Button for copying IP address into clipboard.
 ### Screenshots
 
 > Standard IPv4 address. Button for copying address to clipboard.
+
 ![show ip extension on gnome shell, ipv4](show_ipv4_screenshot.png?raw=true
  "Show IPv4 gnome extension")
 
 > Support for IPv6 syntax
+
 ![show ip extension on gnome shell, ipv6 compatible](show_ipv6_screenshot.png?raw=true
  "Show IPv6 gnome extension")
 
 > Preferences menu for activating Public IP display (not displayed by default)
+
 ![show ip extension preference menu](show_ip_pref_menu_screenshot.png?raw=true
  "Show IP pref menu gnome extension")
 
