@@ -1,17 +1,18 @@
 {
-  "description": "Show IP addresses (private or public) in gnome-shell bar", 
-  "gettext-domain": "show-ip", 
-  "name": "Show IP", 
-  "settings-schema": "org.gnome.shell.extensions.show-ip", 
+  "description": "Show IP addresses (private or public) in gnome-shell bar",
+  "gettext-domain": "show-ip",
+  "name": "Show IP",
+  "settings-schema": "org.gnome.shell.extensions.show-ip",
   "shell-version": [
-    "3.8", 
-    "3.10", 
-    "3.12", 
-    "3.14", 
-    "3.16", 
-    "3.18"
-  ], 
-  "url": "https://github.com/sgaraud/gnome-extension-show-ip", 
-  "uuid": "show-ip@sgaraud.github.com", 
+    "3.8",
+    "3.10",
+    "3.12",
+    "3.14",
+    "3.16",
+    "3.18",
+    "3.20"
+  ],
+  "url": "https://github.com/sgaraud/gnome-extension-show-ip",
+  "uuid": "show-ip@sgaraud.github.com",
   "version": 3
 }
