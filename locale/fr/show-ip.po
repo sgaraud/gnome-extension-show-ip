@@ -1,0 +1,59 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-09-17 18:48+0200\n"
+"PO-Revision-Date: 2016-09-17 18:51+0200\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.9\n"
+"Last-Translator: Raphael Rochet <raphael@rri.fr>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Language: fr\n"
+
+#: extension.js:56
+msgid "not connected"
+msgstr "Non connecté"
+
+#: extension.js:57
+msgid "NM not running"
+msgstr "NM non lancé"
+
+#: extension.js:58
+msgid "Public IP"
+msgstr "IP publique"
+
+#: extension.js:86
+msgid "Show IP"
+msgstr "Show IP"
+
+#: extension.js:161
+msgid "Copy to clipboard"
+msgstr "Copier dans le presse-papier"
+
+#: extension.js:168
+msgid "Preferences"
+msgstr "Préférences"
+
+#: prefs.js:32
+msgid "Display options"
+msgstr "Options d'affichage"
+
+#: prefs.js:49
+msgid "Display IPv6 format"
+msgstr "Afficher le format IPv6"
+
+#: prefs.js:56
+msgid "Display public address"
+msgstr "Afficher l'adresse publique"
+
+#: prefs.js:62
+msgid "Public IP lookup service provider"
+msgstr "Fournisseur pour la recherche d'IP publique"
