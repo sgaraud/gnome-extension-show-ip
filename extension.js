@@ -29,6 +29,9 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
 
+const Gettext = imports.gettext.domain(Me.metadata['gettext-domain']);
+const _ = Gettext.gettext;
+
 /* Used to request via HTTP the public address to a server. */
 const Soup = imports.gi.Soup;
 const _httpSession = new Soup.SessionAsync();
@@ -50,12 +53,13 @@ let Schema = null;
 let settingsChangedPublic = null;
 let settingsChangedIpv6 = null;
 
-const NOT_CONNECTED = 'not connected';
-const NM_NOT_RUNNING = 'NM not running';
-const PUBLIC_IP = 'Public IP';
+const NOT_CONNECTED = _('not connected');
+const NM_NOT_RUNNING = _('NM not running');
+const PUBLIC_IP = _('Public IP');
 
 function init() {
     Schema = Convenience.getSettings();
+    Convenience.initTranslations();
 }
 
 const IpDevice = new Lang.Class({

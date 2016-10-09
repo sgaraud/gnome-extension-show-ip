@@ -4,12 +4,12 @@ const Gio = imports.gi.Gio;
 const Gtk = imports.gi.Gtk;
 const GObject = imports.gi.GObject;
 
-const Gettext = imports.gettext.domain('gnome-shell-extensions');
-const _ = Gettext.gettext;
-
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
+
+const Gettext = imports.gettext.domain(Me.metadata['gettext-domain']);
+const _ = Gettext.gettext;
 
 const SETTINGS_APP_ICON_MODE = 'app-icon-mode';
 const SETTINGS_IPV6 = 'ipv6';
