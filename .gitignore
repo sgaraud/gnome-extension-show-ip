@@ -51,3 +51,12 @@ fabric.properties
 *~
 *.swp
 .project
+
+# Translation generated files #
+###############################
+*.mo
+*.pot
+
+# GNOME generated files #
+#########################
+/src/schemas/gschemas.compiled
