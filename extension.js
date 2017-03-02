@@ -186,20 +186,27 @@ const IpMenuBase = new Lang.Class({
     },
 
     _addToPopupMenu: function (dev) {
-        this.item = new PopupMenu.PopupMenuItem(dev);
+        let text = dev + ' ';
+        for (let device of this._devices) {
+            if (device.ifc == dev) {
+                text += device.ip;
+            }
+        }
+        this.item = new PopupMenu.PopupMenuItem(text);
+        this.item.ifc = dev;
         this.menu.addMenuItem(this.item);
         this._manualUpdateId = this.item.connect('activate', Lang.bind(this, this._manualUpdate));
     },
 
     _manualUpdate: function (it) {
         for (let device of this._devices) {
-            if (device.ifc == it.label.get_text()) {
+            if (device.ifc == it.ifc) {
                 this.selectedDevice = device.ifc;
                 Schema.set_string('last-device', device.ifc);
                 break;
             }
         }
-        if (PUBLIC_IP == it.label.get_text()) {
+        if (PUBLIC_IP == it.ifc) {
             this.selectedDevice = PUBLIC_IP;
             Schema.set_string('last-device', PUBLIC_IP);
         }
