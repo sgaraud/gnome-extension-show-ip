@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 #Extract strings to translate .pot
 xgettext -k_ -kN_ -o locale/show-ip.pot *.js
