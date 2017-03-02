@@ -317,7 +317,7 @@ const IpMenu = new Lang.Class({
         return array[0] + '.' + array[1] + '.' + array[2] + '.' + array[3];
     },
 
-    /* inspired from http://phpjs.org/functions/inet_ntop/ */
+    /* inspired by http://phpjs.org/functions/inet_ntop/ */
     _decodeIp6: function (num) {
         let c = [];
         let m = '';
