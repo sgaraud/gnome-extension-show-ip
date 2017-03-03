@@ -5,6 +5,11 @@
       <summary>Display ipv6 version of the address</summary>
       <description>Set to true to display ipv6 version of the address in the status bar.</description>
     </key>
+    <key name="menu" type="b">
+      <default>false</default>
+      <summary>Display in dropdown menu</summary>
+      <description>Set to true to display the IP address in the network dropdown menu</description>
+    </key>
     <key name="public" type="b">
       <default>false</default>
       <summary>Display public IP address</summary>

@@ -32,6 +32,7 @@ const NetworkManager = imports.gi.NetworkManager;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
+const NetworkPanel = Main.panel.statusArea.aggregateMenu._network;
 
 const Gettext = imports.gettext.domain(Me.metadata['gettext-domain']);
 const _ = Gettext.gettext;
@@ -52,8 +53,10 @@ Soup.Session.prototype.add_feature.call(_httpSession, new Soup.ProxyResolverDefa
 const Shell = imports.gi.Shell;
 let _appSys = Shell.AppSystem.get_default();
 let _gsmPrefs = _appSys.lookup_app('gnome-shell-extension-prefs.desktop');
+let indicator = null;
 let metadata = Me.metadata;
 let Schema = null;
+let settingsChangedMenu = null;
 let settingsChangedPublic = null;
 let settingsChangedIpv6 = null;
 
@@ -78,28 +81,14 @@ const IpDevice = new Lang.Class({
     },
 });
 
-const IpMenu = new Lang.Class({
-    Name: 'IpMenu.IpMenu',
-    Extends: PanelMenu.Button,
+const IpMenuBase = new Lang.Class({
+    Name: 'IpMenuBase.IpMenuBase',
 
-    _init: function () {
-
+    _init: function (menu, label) {
+        this.menu = menu;
         this.nmStarted = true;
         this.selectedDevice = Schema.get_string('last-device');
-
-        this.parent(0.0, _("Show IP"));
-        let nbox = new St.BoxLayout({style_class: 'panel-status-menu-box'});
-
-        this.label = new St.Label({
-            text: '',
-            y_expand: true,
-            y_align: Clutter.ActorAlign.CENTER
-        });
-
-        nbox.add_child(this.label);
-        this.actor.add_child(nbox);
-
-        this.label.set_text(NOT_CONNECTED);
+        this.label = label;
         this.client = NMC.Client.new();
 
         if (this.client.get_manager_running() == false) {
@@ -111,11 +100,6 @@ const IpMenu = new Lang.Class({
         this._clientAddedId = this.client.connect('device-added', Lang.bind(this, this._deviceAdded));
         this._clientRemovedId = this.client.connect('device-removed', Lang.bind(this, this._deviceRemoved));
         this._getNetworkDevices(this.client);
-        this._updateMenuVisibility();
-    },
-
-    _updateMenuVisibility: function () {
-        this.actor.show();
     },
 
     _deviceAdded: function (client, device) {
@@ -183,7 +167,11 @@ const IpMenu = new Lang.Class({
 
         for (let device of this._devices) {
             if (device.ifc == this.selectedDevice) {
-                this.label.set_text(device.ip);
+                if (Schema.get_boolean("menu")) {
+                    this.label.set_text(_("IP: %s").format(device.ip));
+                } else {
+                    this.label.set_text(device.ip);
+                }
                 break;
             }
         }
@@ -366,7 +354,6 @@ const IpMenu = new Lang.Class({
     },
 
     destroy: function () {
-        this.parent();
         if (this.nmStarted == true) {
             for (let device of this._devices) {
                 this._resetDevice(device);
@@ -385,30 +372,85 @@ const IpMenu = new Lang.Class({
     },
 });
 
+const IpMenuPanel = new Lang.Class({
+    Name: 'IpMenuPanel.IpMenuPanel',
+    Extends: PanelMenu.Button,
+
+    _init: function () {
+        this.parent(0.0, _("Show IP"));
+        this.label = new St.Label({
+            text: '',
+            y_expand: true,
+            y_align: Clutter.ActorAlign.CENTER
+        });
+        this.label.set_text(NOT_CONNECTED);
+        this.base = new IpMenuBase(this.menu, this.label);
+        let nbox = new St.BoxLayout({style_class: 'panel-status-menu-box'});
+
+        nbox.add_child(this.base.label);
+        this.actor.add_child(nbox);
+        this.actor.show();
+    },
+
+    destroy: function () {
+        this.base.destroy();
+        this.parent();
+    },
+});
+
+const IpMenuPopup = new Lang.Class({
+    Name: 'IpMenuPopup.IpMenuPopup',
+    Extends: PopupMenu.PopupSubMenuMenuItem,
+
+    _init: function () {
+        this.parent(_("IP:"), false);
+        this.base = new IpMenuBase(this.menu, this.label);
+        this.actor.show();
+    },
+    
+    destroy: function () {
+        this.base.destroy();
+        this.parent();
+    },
+});
+
+function refresh() {
+    indicator.destroy();
+    if (Schema.get_boolean("menu")) {
+        indicator = new IpMenuPopup;
+        NetworkPanel.menu.addMenuItem(indicator, 0);
+    } else {
+        indicator = new IpMenuPanel;
+        Main.panel.addToStatusArea('Ip-menu', indicator);
+    }
+}
+
 let _indicator;
 
 function enable() {
-    _indicator = new IpMenu;
-    Main.panel.addToStatusArea('Ip-menu', _indicator);
+    if (Schema.get_boolean("menu")) {
+        indicator = new IpMenuPopup;
+        NetworkPanel.menu.addMenuItem(indicator, 0);
+    } else {
+        indicator = new IpMenuPanel;
+        Main.panel.addToStatusArea('Ip-menu', indicator);
+    }
 
     /* Monitor settings changes */
-    settingsChangedPublic = Schema.connect('changed::public', function () {
-        _indicator.destroy();
-        _indicator = new IpMenu;
-        Main.panel.addToStatusArea('Ip-menu', _indicator);
-    });
-    settingsChangedIpv6 = Schema.connect('changed::ipv6', function () {
-        _indicator.destroy();
-        _indicator = new IpMenu;
-        Main.panel.addToStatusArea('Ip-menu', _indicator);
-    });
-
+    settingsChangedMenu = Schema.connect('changed::menu', refresh);
+    settingsChangedPublic = Schema.connect('changed::public', refresh);
+    settingsChangedIpv6 = Schema.connect('changed::ipv6', refresh);
 }
 
 function disable() {
-    _indicator.destroy();
+    if (indicator) {
+        indicator.destroy();
+    }
 
     /* disconnect settings changes */
+    if (settingsChangedMenu) {
+        Schema.disconnect(settingsChangedMenu);
+    }
     if (settingsChangedPublic) {
         Schema.disconnect(settingsChangedPublic);
     }
