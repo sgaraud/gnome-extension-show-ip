@@ -57,6 +57,7 @@ issues](https://github.com/sgaraud/gnome-extension-show-ip/issues).
   * sgaraud (Sylvain Garaud)
   * rigelk (Pierre-Antoine Rault)
   * RaphaelRochet (Raphaël Rochet) 
+  * paddatrapper (Kyle Robbertze)
 
 ### License
 
