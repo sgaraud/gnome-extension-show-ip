@@ -2,8 +2,8 @@
   <schema id="org.gnome.shell.extensions.show-ip" path="/org/gnome/shell/extensions/show-ip/">
     <key name="ipv6" type="b">
       <default>false</default>
-      <summary>Display ipv6 version of the address</summary>
-      <description>Set to true to display ipv6 version of the address in the status bar.</description>
+      <summary>Display IPv6 version of the address</summary>
+      <description>Set to true to display IPv6 version of the address in the status bar.</description>
     </key>
     <key name="public" type="b">
       <default>false</default>
