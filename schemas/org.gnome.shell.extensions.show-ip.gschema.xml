@@ -11,7 +11,7 @@
       <description>Set to true to display the public version of your address in the status bar</description>
     </key>
     <key name="ip-lookup-service" type="s">
-      <default>'http://ipinfo.io/ip'</default>
+      <default>'https://ipinfo.io/ip'</default>
       <summary>Service providing public IP lookup</summary>
       <description>Set the webservice providing public IP lookup</description>
     </key>
