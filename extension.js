@@ -338,7 +338,11 @@ const IpMenuBase = new Lang.Class({
         let that = this.label;
         this._getPublic(function (err, res) {
             if (res != null) {
-                that.set_text(res.trim());
+                if (Schema.get_boolean("menu")) {
+                    that.set_text(_("IP: %s").format(res.trim()));
+                } else {
+                    that.set_text(res.trim());
+                }
             }
             else {
                 that.set_text(NOT_CONNECTED);
@@ -424,8 +428,6 @@ function refresh() {
         Main.panel.addToStatusArea('Ip-menu', indicator);
     }
 }
-
-let _indicator;
 
 function enable() {
     if (Schema.get_boolean("menu")) {

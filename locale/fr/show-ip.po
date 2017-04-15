@@ -1,59 +1,71 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Frenchtranslations
+# Copyright (C) 2017
+# This file is distributed under the same license as the show-ip plugin.
+# Raphael Rochet <raphael@rri.fr>, 2016.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-17 18:48+0200\n"
-"PO-Revision-Date: 2016-09-17 18:51+0200\n"
-"Language-Team: \n"
+"POT-Creation-Date: 2017-04-15 13:37+0200\n"
+"PO-Revision-Date: 2017-04-15 13:37+0200\n"
+"Last-Translator: sylvain garaud <garaud@gmail.com>\n"
+"Language-Team: french\n"
+"Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.9\n"
-"Last-Translator: Raphael Rochet <raphael@rri.fr>\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: extension.js:56
+#: extension.js:63
 msgid "not connected"
 msgstr "Non connecté"
 
-#: extension.js:57
+#: extension.js:64
 msgid "NM not running"
 msgstr "NM non lancé"
 
-#: extension.js:58
+#: extension.js:65
 msgid "Public IP"
 msgstr "IP publique"
 
-#: extension.js:86
-msgid "Show IP"
-msgstr "Show IP"
-
-#: extension.js:161
+#: extension.js:149
 msgid "Copy to clipboard"
 msgstr "Copier dans le presse-papier"
 
-#: extension.js:168
+#: extension.js:156
 msgid "Preferences"
 msgstr "Préférences"
 
-#: prefs.js:32
+#: extension.js:171 extension.js:342
+#, javascript-format
+msgid "IP: %s"
+msgstr "IP: %s"
+
+#: extension.js:384
+msgid "Show IP"
+msgstr "Show IP"
+
+#: extension.js:410
+msgid "IP:"
+msgstr "IP:"
+
+#: prefs.js:53
 msgid "Display options"
 msgstr "Options d'affichage"
 
-#: prefs.js:49
+#: prefs.js:70
 msgid "Display IPv6 format"
 msgstr "Afficher le format IPv6"
 
-#: prefs.js:56
+#: prefs.js:77
 msgid "Display public address"
 msgstr "Afficher l'adresse publique"
 
-#: prefs.js:62
+#: prefs.js:84
+msgid "Show in dropdown menu"
+msgstr "Afficher dans le menu déroulant"
+
+#: prefs.js:90
 msgid "Public IP lookup service provider"
 msgstr "Fournisseur pour la recherche d'IP publique"
