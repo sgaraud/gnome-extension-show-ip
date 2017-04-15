@@ -33,6 +33,7 @@ const _ = Gettext.gettext;
 
 const SETTINGS_APP_ICON_MODE = 'app-icon-mode';
 const SETTINGS_IPV6 = 'ipv6';
+const SETTINGS_MENU = 'menu';
 const SETTINGS_PUBLIC = 'public';
 const SETTINGS_LOOKUP_SERVICE = 'ip-lookup-service';
 
@@ -78,6 +79,13 @@ const ShowIPSettingsWidget = new GObject.Class({
         });
         this._settings.bind(SETTINGS_PUBLIC, check2, 'active', Gio.SettingsBindFlags.DEFAULT);
         this.add(check2);
+
+        let check3 = new Gtk.CheckButton({
+            label: _("Show in dropdown menu"),
+            margin_top: 6
+        });
+        this._settings.bind(SETTINGS_MENU, check3, 'active', Gio.SettingsBindFlags.DEFAULT);
+        this.add(check3);
 
         this.add(new Gtk.Label({label: _("Public IP lookup service provider"), halign: Gtk.Align.START}));
         let txt = new Gtk.Entry();

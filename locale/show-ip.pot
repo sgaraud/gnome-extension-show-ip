@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-17 18:47+0200\n"
+"POT-Creation-Date: 2017-04-15 13:37+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,42 +17,55 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: extension.js:56
+#: extension.js:63
 msgid "not connected"
 msgstr ""
 
-#: extension.js:57
+#: extension.js:64
 msgid "NM not running"
 msgstr ""
 
-#: extension.js:58
+#: extension.js:65
 msgid "Public IP"
 msgstr ""
 
-#: extension.js:86
-msgid "Show IP"
-msgstr ""
-
-#: extension.js:161
+#: extension.js:149
 msgid "Copy to clipboard"
 msgstr ""
 
-#: extension.js:168
+#: extension.js:156
 msgid "Preferences"
 msgstr ""
 
-#: prefs.js:32
+#: extension.js:171 extension.js:342
+#, javascript-format
+msgid "IP: %s"
+msgstr ""
+
+#: extension.js:384
+msgid "Show IP"
+msgstr ""
+
+#: extension.js:410
+msgid "IP:"
+msgstr ""
+
+#: prefs.js:53
 msgid "Display options"
 msgstr ""
 
-#: prefs.js:49
+#: prefs.js:70
 msgid "Display IPv6 format"
 msgstr ""
 
-#: prefs.js:56
+#: prefs.js:77
 msgid "Display public address"
 msgstr ""
 
-#: prefs.js:62
+#: prefs.js:84
+msgid "Show in dropdown menu"
+msgstr ""
+
+#: prefs.js:90
 msgid "Public IP lookup service provider"
 msgstr ""
