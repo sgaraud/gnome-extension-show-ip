@@ -51,3 +51,7 @@ fabric.properties
 *~
 *.swp
 .project
+
+# Translation generated files #
+###############################
+*.pot
