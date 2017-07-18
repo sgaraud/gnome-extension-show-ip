@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build show-ip gnome shell extension
+# Build Show-IP GNOME shell extension
 
 echo "Compile schema"
 glib-compile-schemas ./schemas/

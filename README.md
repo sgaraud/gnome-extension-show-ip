@@ -1,7 +1,7 @@
 # Show IP in the GNOME Shell
 
 This GNOME extension (v2) is simply showing current private IP in
-gnome shell status bar if Network Manager is used.  It has a popup
+GNOME shell status bar if Network Manager is used.  It has a popup
 menu to select manually the network device to display if several are
 activated on the machine. It supports both IPv4 and IPv6. Possibility to 
 display public IP. Button for copying IP address into clipboard. Available in English and French.
@@ -10,23 +10,23 @@ display public IP. Button for copying IP address into clipboard. Available in En
 
 > Standard IPv4 address. Button for copying address to clipboard.
 
-![show ip extension on gnome shell, ipv4](show_ipv4_screenshot.png?raw=true
- "Show IPv4 gnome extension")
+![Show IP extension on GNOME shell, IPv4](show_ipv4_screenshot.png?raw=true
+ "Show IPv4 GNOME extension")
 
 > Support for IPv6 syntax
 
-![show ip extension on gnome shell, ipv6 compatible](show_ipv6_screenshot.png?raw=true
- "Show IPv6 gnome extension")
+![Show IP extension on GNOME shell, IPv6 compatible](show_ipv6_screenshot.png?raw=true
+ "Show IPv6 GNOME extension")
 
 > Preferences menu for activating Public IP display (not displayed by default)
 
-![show ip extension preference menu](show_ip_pref_menu_screenshot.png?raw=true
- "Show IP pref menu gnome extension")
+![Show IP extension preference menu](show_ip_pref_menu_screenshot.png?raw=true
+ "Show IP pref menu GNOME extension")
 
 
 ### Installation
 
-#### From gnome extensions website
+#### From GNOME extensions website
 
 The extension is available from the
 extensions.gnome.org website. Visit the following link for
@@ -44,7 +44,7 @@ Clone the desire branch with git
     git clone https://github.com/sgaraud/gnome-extension-show-ip.git \
     ~/.local/share/gnome-shell/extensions/show-ip@sgaraud.github.com
 
-A Shell reload is required <code>Alt+F2 r Enter</code> and extension
+A shell reload is required <code>Alt+F2 r Enter</code> and extension
 has to be enabled with *gnome-tweak-tool*
 
 ### Bug Reporting
@@ -74,4 +74,4 @@ Copyright (C) 2015 Sylvain Garaud
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
