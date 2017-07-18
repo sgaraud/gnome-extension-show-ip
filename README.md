@@ -39,10 +39,21 @@ https://extensions.gnome.org/extension/941/show-ip/
 The extension can be installed directly from source,
 either for the convenience of using git or to test the latest version.
 
-Clone the desire branch with git
+Dependencies:
+ * git
+ * glib2 (for glib-compile-schemas)
+ * gettext (for msgfmt)
+
+Clone the desire branch with git and compile schema and locales 
 
     git clone https://github.com/sgaraud/gnome-extension-show-ip.git \
     ~/.local/share/gnome-shell/extensions/show-ip@sgaraud.github.com
+    
+    cd ~/.local/share/gnome-shell/extensions/show-ip@sgaraud.github.com
+    
+    glib-compile-schemas ./schemas/
+    
+    msgfmt locale/fr/show-ip.po -o locale/fr/LC_MESSAGES/show-ip.mo
 
 A shell reload is required <code>Alt+F2 r Enter</code> and extension
 has to be enabled with *gnome-tweak-tool*
