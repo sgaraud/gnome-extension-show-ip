@@ -59,4 +59,4 @@ fabric.properties
 
 # GNOME generated files #
 #########################
-/src/schemas/gschemas.compiled
+gschemas.compiled

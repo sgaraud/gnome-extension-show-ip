@@ -53,7 +53,7 @@ Clone the desire branch with git and compile schema and locales
     
     glib-compile-schemas ./schemas/
     
-    msgfmt locale/fr/show-ip.po -o locale/fr/LC_MESSAGES/show-ip.mo
+    msgfmt locale/fr/LC_MESSAGES/show-ip.po -o locale/fr/LC_MESSAGES/show-ip.mo
 
 A shell reload is required <code>Alt+F2 r Enter</code> and extension
 has to be enabled with *gnome-tweak-tool*

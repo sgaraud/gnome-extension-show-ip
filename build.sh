@@ -5,7 +5,7 @@ echo "Compile schema"
 glib-compile-schemas ./schemas/
 
 echo "Compile French locale (po to mo)"
-msgfmt locale/fr/show-ip.po -o locale/fr/LC_MESSAGES/show-ip.mo
+msgfmt locale/fr/LC_MESSAGES/show-ip.po -o locale/fr/LC_MESSAGES/show-ip.mo
 
 echo "Create zip archive"
 rm show-ip@sgaraud.github.com.zip
