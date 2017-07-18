@@ -2,8 +2,8 @@
   <schema id="org.gnome.shell.extensions.show-ip" path="/org/gnome/shell/extensions/show-ip/">
     <key name="ipv6" type="b">
       <default>false</default>
-      <summary>Display IPv6 version of the address</summary>
-      <description>Set to true to display IPv6 version of the address in the status bar.</description>
+      <summary>Display ipv6 version of the address</summary>
+      <description>Set to true to display ipv6 version of the address in the status bar.</description>
     </key>
     <key name="menu" type="b">
       <default>false</default>
@@ -16,7 +16,7 @@
       <description>Set to true to display the public version of your address in the status bar</description>
     </key>
     <key name="ip-lookup-service" type="s">
-      <default>'https://ipinfo.io/ip'</default>
+      <default>'http://ipinfo.io/ip'</default>
       <summary>Service providing public IP lookup</summary>
       <description>Set the webservice providing public IP lookup</description>
     </key>

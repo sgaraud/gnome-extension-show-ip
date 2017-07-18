@@ -1,22 +1,22 @@
 /*
- * Show IP menu GNOME extension
+ * Show Ip menu gnome extension
  * https://github.com/sgaraud/gnome-extension-show-ip
  * 
  * Copyright (C) 2015 Sylvain Garaud
  *
- * This file is part of Show-IP GNOME extension.
- * Show IP GNOME extension is free software: you can redistribute it and/or modify
+ * This file is part of show-ip gnome extension.
+ * Show Ip gnome extension is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Show IP GNOME extension is distributed in the hope that it will be useful,
+ * Show Ip gnome extension is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Show IP GNOME extension.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Show Ip gnome extension.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
 
@@ -41,7 +41,7 @@ const _ = Gettext.gettext;
 const Soup = imports.gi.Soup;
 const _httpSession = new Soup.SessionAsync();
 /* This makes the session work under a proxy. The funky syntax here
- * is required because of another libsoup quirk, where there's a GObject
+ * is required because of another libsoup quirk, where there's a gobject
  * property called 'add-feature', designed as a construct property for
  * C convenience.
  */
@@ -305,7 +305,7 @@ const IpMenuBase = new Lang.Class({
         return array[0] + '.' + array[1] + '.' + array[2] + '.' + array[3];
     },
 
-    /* inspired by http://locutus.io/php/network/inet_ntop/ */
+    /* inspired from http://phpjs.org/functions/inet_ntop/ */
     _decodeIp6: function (num) {
         let c = [];
         let m = '';
