@@ -296,7 +296,7 @@ const IpMenuBase = new Lang.Class({
 
     _decodeIp4: function (num) {
         num = num >>> 0;
-        let array = Uint8Array(4);
+        let array = new Uint8Array(4);
         array[0] = num;
         array[1] = num >> 8;
         array[2] = num >> 16;
