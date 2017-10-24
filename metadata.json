@@ -11,9 +11,10 @@
     "3.16",
     "3.18",
     "3.20",
-    "3.22"
+    "3.22",
+    "3.24",
+    "3.26"
   ],
   "url": "https://github.com/sgaraud/gnome-extension-show-ip",
-  "uuid": "show-ip@sgaraud.github.com",
-  "version": 3
+  "uuid": "show-ip@sgaraud.github.com"
 }
