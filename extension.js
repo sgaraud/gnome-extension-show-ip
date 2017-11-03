@@ -20,6 +20,10 @@
  * 
  */
 
+/* Ugly. This is here so that we don't crash old libnm-glib based shells unnecessarily
+ * by loading the new libnm.so. Should go away eventually */
+const libnm_glib = imports.gi.GIRepository.Repository.get_default().is_registered("NMClient", "1.0");
+
 const Clutter = imports.gi.Clutter;
 const Lang = imports.lang;
 const St = imports.gi.St;
@@ -27,12 +31,13 @@ const GObject = imports.gi.GObject;
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
-const NMC = imports.gi.NMClient;
-const NetworkManager = imports.gi.NetworkManager;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
 const NetworkPanel = Main.panel.statusArea.aggregateMenu._network;
+
+const NMC = libnm_glib ? imports.gi.NMClient : imports.gi.NM;
+const NetworkManager = libnm_glib ? imports.gi.NetworkManager : NMC;
 
 const Gettext = imports.gettext.domain(Me.metadata['gettext-domain']);
 const _ = Gettext.gettext;
@@ -89,9 +94,9 @@ const IpMenuBase = new Lang.Class({
         this.nmStarted = true;
         this.selectedDevice = Schema.get_string('last-device');
         this.label = label;
-        this.client = NMC.Client.new();
+        this.client = libnm_glib ? NMC.Client.new() : NMC.Client.new(null);
 
-        if (this.client.get_manager_running() == false) {
+        if ((libnm_glib ? this.client.get_manager_running() : this.client.get_nm_running()) == false) {
             this.label.set_text(NM_NOT_RUNNING);
             this.nmStarted = false;
             return;
@@ -295,6 +300,8 @@ const IpMenuBase = new Lang.Class({
     },
 
     _decodeIp4: function (num) {
+        if (!libnm_glib)
+            return num;
         num = num >>> 0;
         let array = new Uint8Array(4);
         array[0] = num;
@@ -307,6 +314,8 @@ const IpMenuBase = new Lang.Class({
 
     /* inspired by http://locutus.io/php/network/inet_ntop/ */
     _decodeIp6: function (num) {
+        if (!libnm_glib)
+            return num;
         let c = [];
         let m = '';
         let i = 0;
