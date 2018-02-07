@@ -23,6 +23,11 @@ display public IP. Button for copying IP address into clipboard. Available in En
 ![Show IP extension preference menu](show_ip_pref_menu_screenshot.png?raw=true
  "Show IP pref menu GNOME extension")
 
+> IP display in GNOME dropdown menu instead of GNOME shell status bar (not selected by default)
+
+![Show IP extension in dropdown menu](show_ip_dropdown_menu_screenshot.png?raw=true
+ "Show IP dropdown menu GNOME extension")
+
 
 ### Installation
 
@@ -63,12 +68,17 @@ has to be enabled with *gnome-tweak-tool*
 :sweat_smile: Bugs should be reported to the Github [bug tracker
 issues](https://github.com/sgaraud/gnome-extension-show-ip/issues).
 
-### Authors
+### Author
 
   * sgaraud (Sylvain Garaud)
+  
+### Contributors
+
   * rigelk (Pierre-Antoine Rault)
   * RaphaelRochet (Raphaël Rochet) 
   * paddatrapper (Kyle Robbertze)
+  * pabs3 (Paul Wise)
+  * lkundrak (Lubomir Rintel)
 
 ### License
 
