@@ -3,6 +3,7 @@
  * https://github.com/sgaraud/gnome-extension-show-ip
  * 
  * Copyright (C) 2015 Sylvain Garaud
+ * Copyright 2017 Paul Wise
  *
  * This file is part of Show-IP GNOME extension.
  * Show IP GNOME extension is free software: you can redistribute it and/or modify
@@ -170,17 +171,30 @@ const IpMenuBase = new Lang.Class({
             }
         });
 
+        this._getPrimaryDevices(this.client);
+        let selectedIp = '';
+        let primaryIp = '';
+        let firstIp = '';
         for (let device of this._devices) {
-            if (device.ifc == this.selectedDevice) {
-                if (Schema.get_boolean("menu")) {
-                    this.label.set_text(_("IP: %s").format(device.ip));
-                } else {
-                    this.label.set_text(device.ip);
-                }
-                break;
+            if (!selectedIp && device.ifc == this.selectedDevice) {
+                selectedIp = device.ip;
+            }
+            if (!primaryIp && device.primary) {
+                primaryIp = device.ip;
+            }
+            if (!firstIp) {
+                firstIp = device.ip;
             }
         }
-        if ('' == this.selectedDevice) {
+        let ip = selectedIp ? selectedIp : primaryIp ? primaryIp : firstIp;
+        if (ip) {
+            if (Schema.get_boolean("menu")) {
+                this.label.set_text(_("IP: %s").format(ip));
+            } else {
+                this.label.set_text(ip);
+            }
+            this.label.set_text(ip);
+        } else {
             this.label.set_text(NOT_CONNECTED);
         }
     },
@@ -205,6 +219,26 @@ const IpMenuBase = new Lang.Class({
         }
 
         this._createPopupMenu();
+    },
+
+    _getPrimaryDevices: function (nmc) {
+        let primary_conn = nmc.get_primary_connection();
+        let primary_devices = primary_conn.get_devices();
+        let primary_ifcs = [];
+        let i = 0;
+        if (primary_devices) {
+            for (let device of primary_devices) {
+                primary_ifcs[i++] = device.get_iface();
+            }
+        }
+        for (let device of this._devices) {
+            device.primary = false;
+            for (let ifc of primary_ifcs) {
+                if (device.ifc == ifc) {
+                    device.primary = true;
+                }
+            }
+        }
     },
 
     _getNetworkDevices: function (nmc) {
@@ -289,9 +323,6 @@ const IpMenuBase = new Lang.Class({
                     device.ip = this._decodeIp6(ipadd);
                 } else {
                     device.ip = this._decodeIp4(ipadd);
-                }
-                if ('' == this.selectedDevice) {
-                    this.selectedDevice = device.ifc;
                 }
                 break;
             }
