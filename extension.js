@@ -57,7 +57,11 @@ Soup.Session.prototype.add_feature.call(_httpSession, new Soup.ProxyResolverDefa
  */
 const Shell = imports.gi.Shell;
 let _appSys = Shell.AppSystem.get_default();
-let _gsmPrefs = _appSys.lookup_app('gnome-shell-extension-prefs.desktop');
+let _gsmPrefs = _appSys.lookup_app('org.gnome.Extensions.desktop');
+if (_gsmPrefs == None) {
+  // GNOME Shell versions < 3.36
+  let _gsmPrefs = _appSys.lookup_app('gnome-shell-extension-prefs.desktop');
+}
 let indicator = null;
 let metadata = Me.metadata;
 let Schema = null;
